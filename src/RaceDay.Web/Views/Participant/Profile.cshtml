@@ -1,0 +1,78 @@
+@model ParticipantProfileViewModel
+@{
+    ViewData["Title"] = "My profile";
+    var picture = UiHelpers.MediaUrl(Model.ProfilePicture);
+}
+<div class="page-header">
+    <h1 class="rd-heading">My profile</h1>
+    <p class="text-muted">Keep your details up to date.</p>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-4">
+        <div class="card rd-card text-center"><div class="card-body p-4">
+            @if (picture is not null)
+            {
+                <img src="@picture" class="avatar avatar-lg mb-3" alt="Your profile picture" />
+            }
+            else
+            {
+                <div class="avatar avatar-lg avatar-placeholder mb-3">@UiHelpers.Initials(Model.FirstName + " " + Model.LastName)</div>
+            }
+            <h2 class="h5">@Model.FirstName @Model.LastName</h2>
+            <p class="text-muted small">@Model.Email</p>
+            <form asp-action="UploadPicture" method="post" enctype="multipart/form-data">
+                <input type="file" name="picture" class="form-control form-control-sm mb-2" accept="image/jpeg,image/png,image/webp,image/gif" required />
+                <button type="submit" class="btn btn-outline-primary btn-sm w-100"><i class="bi bi-camera-fill"></i> Upload picture</button>
+                <div class="form-text">JPEG, PNG, WebP or GIF, up to 5 MB.</div>
+            </form>
+        </div></div>
+    </div>
+    <div class="col-lg-8">
+        <div class="card rd-card"><div class="card-body p-4">
+            <h2 class="h4 rd-heading">Personal information</h2>
+            <form asp-action="Profile" method="post" novalidate>
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+                <input type="hidden" asp-for="ProfilePicture" />
+                <input type="hidden" asp-for="Email" />
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="FirstName" class="form-label"></label>
+                        <input asp-for="FirstName" class="form-control" />
+                        <span asp-validation-for="FirstName" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="LastName" class="form-label"></label>
+                        <input asp-for="LastName" class="form-control" />
+                        <span asp-validation-for="LastName" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Email</label>
+                        <input value="@Model.Email" class="form-control" disabled />
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Phone" class="form-label"></label>
+                        <input asp-for="Phone" class="form-control" />
+                        <span asp-validation-for="Phone" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="DateOfBirth" class="form-label"></label>
+                        <input asp-for="DateOfBirth" type="date" class="form-control" />
+                        <span asp-validation-for="DateOfBirth" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Gender" class="form-label"></label>
+                        <select asp-for="Gender" class="form-select">
+                            <option value="">Choose...</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                        <span asp-validation-for="Gender" class="text-danger small"></span>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary mt-4">Save changes</button>
+            </form>
+        </div></div>
+    </div>
+</div>

@@ -1,0 +1,91 @@
+@{
+    var isAuthenticated = User.Identity?.IsAuthenticated == true;
+    var isOrganiser = User.IsInRole("Organiser");
+    var isParticipant = User.IsInRole("Participant");
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString() ?? string.Empty;
+    var action = ViewContext.RouteData.Values["action"]?.ToString() ?? string.Empty;
+
+    string Active(string c, params string[] actions) =>
+        controller == c && (actions.Length == 0 || actions.Contains(action)) ? "active" : string.Empty;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@(ViewData["Title"] ?? "RaceDay") | RaceDay</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+    <link href="~/css/site.css" rel="stylesheet" asp-append-version="true" />
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg rd-navbar">
+        <div class="container">
+            <a class="navbar-brand rd-brand" asp-controller="Home" asp-action="Index">
+                <i class="bi bi-lightning-charge-fill"></i> RACE<span>DAY</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="mainNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    @if (isOrganiser)
+                    {
+                        <li class="nav-item"><a class="nav-link @Active("Organiser", "Dashboard")" asp-controller="Organiser" asp-action="Dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+                        <li class="nav-item"><a class="nav-link @Active("Organiser", "Events", "EditEvent", "Categories", "Enrollments", "Results")" asp-controller="Organiser" asp-action="Events"><i class="bi bi-flag-fill"></i> My events</a></li>
+                        <li class="nav-item"><a class="nav-link @Active("Organiser", "CreateEvent")" asp-controller="Organiser" asp-action="CreateEvent"><i class="bi bi-plus-circle-fill"></i> Create event</a></li>
+                        <li class="nav-item"><a class="nav-link @Active("Organiser", "Profile")" asp-controller="Organiser" asp-action="Profile"><i class="bi bi-building"></i> Organisation</a></li>
+                    }
+                    else if (isParticipant)
+                    {
+                        <li class="nav-item"><a class="nav-link @Active("Home")" asp-controller="Home" asp-action="Index"><i class="bi bi-calendar-event-fill"></i> Upcoming events</a></li>
+                        <li class="nav-item"><a class="nav-link @Active("Participant", "MyEnrollments")" asp-controller="Participant" asp-action="MyEnrollments"><i class="bi bi-ticket-perforated-fill"></i> My enrolments</a></li>
+                        <li class="nav-item"><a class="nav-link @Active("Participant", "MyResults")" asp-controller="Participant" asp-action="MyResults"><i class="bi bi-trophy-fill"></i> My results</a></li>
+                        <li class="nav-item"><a class="nav-link @Active("Participant", "Profile")" asp-controller="Participant" asp-action="Profile"><i class="bi bi-person-circle"></i> Profile</a></li>
+                    }
+                    else
+                    {
+                        <li class="nav-item"><a class="nav-link @Active("Home")" asp-controller="Home" asp-action="Index"><i class="bi bi-house-fill"></i> Home</a></li>
+                    }
+                </ul>
+                <div class="d-flex align-items-center gap-2">
+                    @if (isAuthenticated)
+                    {
+                        <span class="rd-user"><i class="bi bi-person-badge"></i> @User.Identity!.Name <small>(@(isOrganiser ? "Organiser" : "Participant"))</small></span>
+                        <form asp-controller="Account" asp-action="Logout" method="post" class="m-0">
+                            <button type="submit" class="btn btn-sm btn-outline-light"><i class="bi bi-box-arrow-right"></i> Log out</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <a class="btn btn-sm btn-outline-light" asp-controller="Account" asp-action="Login">Log in</a>
+                        <a class="btn btn-sm btn-primary" asp-controller="Account" asp-action="Register">Register</a>
+                    }
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container rd-main">
+        <partial name="_Alerts" />
+        @RenderBody()
+    </main>
+
+    <footer class="rd-footer">
+        <div class="container d-flex flex-column flex-md-row justify-content-between gap-2">
+            <span class="rd-brand-small">RACE<span>DAY</span></span>
+            <span>South Africa's home for road running, walking and cycling events.</span>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/4.0.0/jquery.validate.unobtrusive.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

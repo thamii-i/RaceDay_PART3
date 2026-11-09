@@ -1,0 +1,72 @@
+@model DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+<div class="page-header d-flex flex-wrap justify-content-between align-items-end gap-2">
+    <div>
+        <h1 class="rd-heading">Organiser dashboard</h1>
+        <p class="text-muted mb-0">A summary of the events you have created.</p>
+    </div>
+    <a class="btn btn-primary" asp-action="CreateEvent"><i class="bi bi-plus-circle-fill"></i> Create event</a>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4"><div class="stat-card"><i class="bi bi-flag-fill"></i><span class="stat-value">@Model.Events.Count</span><span class="stat-label">Events created</span></div></div>
+    <div class="col-md-4"><div class="stat-card"><i class="bi bi-calendar-event-fill"></i><span class="stat-value">@Model.Upcoming.Count</span><span class="stat-label">Upcoming events</span></div></div>
+    <div class="col-md-4"><div class="stat-card"><i class="bi bi-people-fill"></i><span class="stat-value">@Model.TotalEnrollments</span><span class="stat-label">Total enrolments</span></div></div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-5">
+        <div class="card rd-card h-100"><div class="card-body p-4">
+            <h2 class="h4 rd-heading">Upcoming event dates</h2>
+            @if (Model.Upcoming.Count == 0)
+            {
+                <p class="text-muted mb-0">No upcoming events. Create one to get started.</p>
+            }
+            else
+            {
+                <ul class="list-unstyled upcoming-list mb-0">
+                    @foreach (var ev in Model.Upcoming)
+                    {
+                        <li>
+                            <div class="date-chip"><span>@ev.EventDate.ToString("MMM")</span><strong>@ev.EventDate.Day</strong></div>
+                            <div>
+                                <a asp-action="Enrollments" asp-route-eventId="@ev.EventId" class="fw-semibold">@ev.EventName</a>
+                                <div class="text-muted small">@ev.Location, @ev.EnrollmentCount enrolled</div>
+                            </div>
+                        </li>
+                    }
+                </ul>
+            }
+        </div></div>
+    </div>
+    <div class="col-lg-7">
+        <div class="card rd-card h-100"><div class="card-body p-4">
+            <h2 class="h4 rd-heading">Enrolments per event</h2>
+            @if (Model.Events.Count == 0)
+            {
+                <p class="text-muted mb-0">You have not created any events yet.</p>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table rd-table align-middle mb-0">
+                        <thead><tr><th>Event</th><th>Date</th><th class="text-end">Enrolments</th><th></th></tr></thead>
+                        <tbody>
+                            @foreach (var ev in Model.Events.OrderBy(e => e.EventDate))
+                            {
+                                <tr>
+                                    <td class="fw-semibold">@ev.EventName</td>
+                                    <td>@ev.EventDate.ToString("dd MMM yyyy")</td>
+                                    <td class="text-end"><span class="count-pill">@ev.EnrollmentCount</span></td>
+                                    <td class="text-end"><a class="btn btn-sm btn-outline-primary" asp-action="Enrollments" asp-route-eventId="@ev.EventId">View</a></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div></div>
+    </div>
+</div>

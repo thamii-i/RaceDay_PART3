@@ -1,0 +1,67 @@
+@model CategoriesPageViewModel
+@{
+    ViewData["Title"] = "Categories";
+}
+<a class="back-link" asp-action="Events"><i class="bi bi-arrow-left"></i> My events</a>
+<div class="page-header mt-2">
+    <h1 class="rd-heading">Categories</h1>
+    <p class="text-muted">@Model.Event.EventName, @Model.Event.EventDate.ToString("dd MMM yyyy")</p>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="card rd-card h-100"><div class="card-body p-4">
+            <h2 class="h4 rd-heading">Event categories</h2>
+            @if (Model.Categories.Count == 0)
+            {
+                <p class="text-muted mb-0">No categories yet. Add age or distance categories such as Under 20, Senior, 10km or 21km.</p>
+            }
+            else
+            {
+                <ul class="list-group list-group-flush">
+                    @foreach (var category in Model.Categories)
+                    {
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            <div>
+                                <strong>@category.CategoryName</strong>
+                                @if (!string.IsNullOrWhiteSpace(category.Description))
+                                {
+                                    <span class="text-muted small d-block">@category.Description</span>
+                                }
+                            </div>
+                            <form asp-action="RemoveCategory" method="post" class="m-0" onsubmit="return confirm('Remove this category from the event?');">
+                                <input type="hidden" name="eventId" value="@Model.Event.EventId" />
+                                <input type="hidden" name="categoryId" value="@category.CategoryId" />
+                                <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-x-lg"></i> Remove</button>
+                            </form>
+                        </li>
+                    }
+                </ul>
+            }
+        </div></div>
+    </div>
+    <div class="col-lg-5">
+        <div class="card rd-card h-100"><div class="card-body p-4">
+            <h2 class="h4 rd-heading">Add a category</h2>
+            <form asp-action="AddCategory" method="post">
+                <input type="hidden" name="eventId" value="@Model.Event.EventId" />
+                <div class="mb-3">
+                    <label for="categoryName" class="form-label">Category name</label>
+                    <input id="categoryName" name="categoryName" class="form-control" maxlength="50" list="existingCategories" placeholder="e.g. Under 20 or 21km" required />
+                    <datalist id="existingCategories">
+                        @foreach (var category in Model.AllCategories)
+                        {
+                            <option value="@category.CategoryName"></option>
+                        }
+                    </datalist>
+                </div>
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description (optional)</label>
+                    <input id="description" name="description" class="form-control" maxlength="200" />
+                </div>
+                <button type="submit" class="btn btn-primary w-100"><i class="bi bi-plus-circle-fill"></i> Add category</button>
+                <div class="form-text">Choosing an existing name reuses that category.</div>
+            </form>
+        </div></div>
+    </div>
+</div>

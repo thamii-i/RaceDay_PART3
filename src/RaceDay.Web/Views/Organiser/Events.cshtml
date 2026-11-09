@@ -1,0 +1,64 @@
+@model List<ApiEvent>
+@{
+    ViewData["Title"] = "My events";
+}
+<div class="page-header d-flex flex-wrap justify-content-between align-items-end gap-2">
+    <div>
+        <h1 class="rd-heading">My events</h1>
+        <p class="text-muted mb-0">Create, edit and manage your events.</p>
+    </div>
+    <a class="btn btn-primary" asp-action="CreateEvent"><i class="bi bi-plus-circle-fill"></i> Create event</a>
+</div>
+
+@if (Model.Count == 0)
+{
+    <div class="empty-state">
+        <i class="bi bi-flag"></i>
+        <h2 class="h4 rd-heading">No events yet</h2>
+        <p class="text-muted">Create your first event to start taking enrolments.</p>
+        <a class="btn btn-primary" asp-action="CreateEvent">Create event</a>
+    </div>
+}
+else
+{
+    <div class="card rd-card"><div class="table-responsive">
+        <table class="table rd-table align-middle mb-0">
+            <thead>
+                <tr><th></th><th>Event</th><th>Date</th><th>Type</th><th>Distance</th><th>Enrolments</th><th class="text-end">Manage</th></tr>
+            </thead>
+            <tbody>
+                @foreach (var ev in Model.OrderBy(e => e.EventDate))
+                {
+                    var thumb = UiHelpers.MediaUrl(ev.BannerImage);
+                    <tr>
+                        <td style="width:72px">
+                            @if (thumb is not null)
+                            {
+                                <img src="@thumb" class="thumb" alt="Banner for @ev.EventName" />
+                            }
+                            else
+                            {
+                                <div class="thumb event-card-placeholder"><i class="bi @UiHelpers.TypeIcon(ev.EventType)"></i></div>
+                            }
+                        </td>
+                        <td><span class="fw-semibold">@ev.EventName</span><div class="text-muted small">@ev.Location</div></td>
+                        <td>@ev.EventDate.ToString("dd MMM yyyy")</td>
+                        <td><span class="type-badge"><i class="bi @UiHelpers.TypeIcon(ev.EventType)"></i> @ev.EventType</span></td>
+                        <td>@ev.DistanceKm.ToString("0.##") km</td>
+                        <td><span class="count-pill">@ev.EnrollmentCount</span></td>
+                        <td class="text-end text-nowrap">
+                            <a class="btn btn-sm btn-outline-primary" asp-action="EditEvent" asp-route-id="@ev.EventId"><i class="bi bi-pencil-fill"></i> Edit</a>
+                            <a class="btn btn-sm btn-outline-primary" asp-action="Categories" asp-route-eventId="@ev.EventId"><i class="bi bi-tags-fill"></i> Categories</a>
+                            <a class="btn btn-sm btn-outline-primary" asp-action="Enrollments" asp-route-eventId="@ev.EventId"><i class="bi bi-people-fill"></i> Enrolments</a>
+                            <a class="btn btn-sm btn-outline-primary" asp-action="Results" asp-route-eventId="@ev.EventId"><i class="bi bi-trophy-fill"></i> Results</a>
+                            <form asp-action="DeleteEvent" method="post" class="d-inline" onsubmit="return confirm('Delete this event together with its enrolments and results?');">
+                                <input type="hidden" name="id" value="@ev.EventId" />
+                                <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash-fill"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div></div>
+}

@@ -1,0 +1,57 @@
+@model EnrollmentsPageViewModel
+@{
+    ViewData["Title"] = "Enrolments";
+}
+<a class="back-link" asp-action="Events"><i class="bi bi-arrow-left"></i> My events</a>
+<div class="page-header mt-2 d-flex flex-wrap justify-content-between align-items-end gap-2">
+    <div>
+        <h1 class="rd-heading">Enrolments</h1>
+        <p class="text-muted mb-0">@Model.Event.EventName, @Model.Event.EventDate.ToString("dd MMM yyyy")</p>
+    </div>
+    <a class="btn btn-outline-primary" asp-action="Results" asp-route-eventId="@Model.Event.EventId"><i class="bi bi-trophy-fill"></i> Enter results</a>
+</div>
+
+@if (Model.Enrollments.Count == 0)
+{
+    <div class="empty-state">
+        <i class="bi bi-people"></i>
+        <h2 class="h4 rd-heading">No enrolments yet</h2>
+        <p class="text-muted">Participants who enter this event will appear here.</p>
+    </div>
+}
+else
+{
+    <div class="card rd-card"><div class="table-responsive">
+        <table class="table rd-table align-middle mb-0">
+            <thead>
+                <tr><th>Bib</th><th>Participant</th><th>Category</th><th>Enrolled</th><th>Status</th><th class="text-end">Update status</th></tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Enrollments.OrderBy(e => e.BibNumber))
+                {
+                    <tr>
+                        <td><span class="count-pill">@item.BibNumber</span></td>
+                        <td class="fw-semibold">@item.ParticipantName</td>
+                        <td>@item.CategoryName</td>
+                        <td>@item.EnrollmentDate.ToString("dd MMM yyyy")</td>
+                        <td><partial name="_Status" model="item.Status" /></td>
+                        <td class="text-end text-nowrap">
+                            @foreach (var status in new[] { "Confirmed", "Pending", "Cancelled" })
+                            {
+                                if (status != item.Status)
+                                {
+                                    <form asp-action="SetEnrollmentStatus" method="post" class="d-inline">
+                                        <input type="hidden" name="eventId" value="@Model.Event.EventId" />
+                                        <input type="hidden" name="enrollmentId" value="@item.EnrollmentId" />
+                                        <input type="hidden" name="status" value="@status" />
+                                        <button type="submit" class="btn btn-sm btn-outline-secondary">@status</button>
+                                    </form>
+                                }
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div></div>
+}

@@ -1,0 +1,50 @@
+@model List<ApiEnrollment>
+@{
+    ViewData["Title"] = "My enrolments";
+    var today = DateOnly.FromDateTime(DateTime.Today);
+}
+<div class="page-header">
+    <h1 class="rd-heading">My enrolments</h1>
+    <p class="text-muted">Every event you have entered and where your entry stands.</p>
+</div>
+
+@if (Model.Count == 0)
+{
+    <div class="empty-state">
+        <i class="bi bi-ticket-perforated"></i>
+        <h2 class="h4 rd-heading">No enrolments yet</h2>
+        <p class="text-muted">Find an event and pick a category to enter.</p>
+        <a class="btn btn-primary" asp-controller="Home" asp-action="Index">Browse events</a>
+    </div>
+}
+else
+{
+    <div class="card rd-card"><div class="table-responsive">
+        <table class="table rd-table align-middle mb-0">
+            <thead>
+                <tr><th>Event</th><th>Date</th><th>Category</th><th>Bib</th><th>Status</th><th class="text-end">Actions</th></tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td><a asp-action="EventDetails" asp-route-id="@item.EventId" class="fw-semibold">@item.EventName</a></td>
+                        <td>@item.EventDate.ToString("dd MMM yyyy")</td>
+                        <td>@item.CategoryName</td>
+                        <td>@item.BibNumber</td>
+                        <td><partial name="_Status" model="item.Status" /></td>
+                        <td class="text-end">
+                            @if (item.EventDate >= today)
+                            {
+                                <form asp-action="Withdraw" method="post" class="d-inline" onsubmit="return confirm('Withdraw from this event?');">
+                                    <input type="hidden" name="id" value="@item.EnrollmentId" />
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">Withdraw</button>
+                                </form>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div></div>
+}

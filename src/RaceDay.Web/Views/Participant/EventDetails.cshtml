@@ -1,0 +1,102 @@
+@model EventDetailsViewModel
+@{
+    var ev = Model.Event;
+    ViewData["Title"] = ev.EventName;
+    var banner = UiHelpers.MediaUrl(ev.BannerImage);
+}
+<a class="back-link" asp-controller="Home" asp-action="Index"><i class="bi bi-arrow-left"></i> All events</a>
+
+<div class="card rd-card overflow-hidden mt-2 mb-4">
+    @if (banner is not null)
+    {
+        <img src="@banner" class="event-banner" alt="Banner for @ev.EventName" />
+    }
+    else
+    {
+        <div class="event-banner event-card-placeholder"><i class="bi @UiHelpers.TypeIcon(ev.EventType)"></i></div>
+    }
+    <div class="card-body p-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+            <div>
+                <span class="type-badge"><i class="bi @UiHelpers.TypeIcon(ev.EventType)"></i> @ev.EventType</span>
+                <h1 class="rd-heading mt-2 mb-1">@ev.EventName</h1>
+                <p class="text-muted mb-0">Organised by @ev.OrganisationName</p>
+            </div>
+            @if (Model.IsPast)
+            {
+                <span class="status-badge status-cancelled"><i class="bi bi-flag-fill"></i> Event completed</span>
+            }
+        </div>
+        <div class="row g-3 my-3 event-facts">
+            <div class="col-6 col-md-3"><div class="fact"><i class="bi bi-calendar3"></i><span>@ev.EventDate.ToString("dddd, dd MMMM yyyy")</span></div></div>
+            <div class="col-6 col-md-3"><div class="fact"><i class="bi bi-geo-alt-fill"></i><span>@ev.Location</span></div></div>
+            <div class="col-6 col-md-3"><div class="fact"><i class="bi bi-rulers"></i><span>@ev.DistanceKm.ToString("0.##") km</span></div></div>
+            <div class="col-6 col-md-3"><div class="fact"><i class="bi bi-people-fill"></i><span>@ev.EnrollmentCount enrolled</span></div></div>
+        </div>
+        <p>@ev.Description</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="card rd-card h-100"><div class="card-body p-4">
+            <h2 class="h4 rd-heading">Available categories</h2>
+            @if (Model.Categories.Count == 0)
+            {
+                <p class="text-muted mb-0">The organiser has not added any categories yet.</p>
+            }
+            else
+            {
+                <ul class="list-unstyled category-list mb-0">
+                    @foreach (var category in Model.Categories)
+                    {
+                        <li>
+                            <strong>@category.CategoryName</strong>
+                            @if (!string.IsNullOrWhiteSpace(category.Description))
+                            {
+                                <span class="text-muted small d-block">@category.Description</span>
+                            }
+                        </li>
+                    }
+                </ul>
+            }
+        </div></div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card rd-card h-100"><div class="card-body p-4">
+            <h2 class="h4 rd-heading">Enter this event</h2>
+            @if (Model.MyEnrollment is not null)
+            {
+                <p class="mb-2">You are enrolled in the <strong>@Model.MyEnrollment.CategoryName</strong> category.</p>
+                <p class="mb-2">Bib number: <strong>@Model.MyEnrollment.BibNumber</strong></p>
+                <p class="mb-3">Status: <partial name="_Status" model="Model.MyEnrollment.Status" /></p>
+                <a class="btn btn-outline-primary" asp-action="MyEnrollments">View my enrolments</a>
+            }
+            else if (Model.IsPast)
+            {
+                <p class="text-muted mb-0">This event has already taken place, so enrolment is closed.</p>
+            }
+            else if (Model.Categories.Count == 0)
+            {
+                <p class="text-muted mb-0">Enrolment opens once the organiser adds categories.</p>
+            }
+            else
+            {
+                <form asp-action="Enrol" method="post">
+                    <input type="hidden" name="eventId" value="@ev.EventId" />
+                    <div class="mb-3">
+                        <label for="categoryId" class="form-label">Choose your category</label>
+                        <select id="categoryId" name="categoryId" class="form-select" required>
+                            <option value="">Select a category...</option>
+                            @foreach (var category in Model.Categories)
+                            {
+                                <option value="@category.CategoryId">@category.CategoryName</option>
+                            }
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100"><i class="bi bi-ticket-perforated-fill"></i> Enrol now</button>
+                </form>
+            }
+        </div></div>
+    </div>
+</div>

@@ -1,0 +1,11 @@
+@model string
+@{
+    var icon = Model switch
+    {
+        "Confirmed" => "bi-check-circle-fill",
+        "Pending" => "bi-hourglass-split",
+        "Cancelled" => "bi-x-circle-fill",
+        _ => "bi-circle"
+    };
+}
+<span class="status-badge @UiHelpers.StatusClass(Model)"><i class="bi @icon"></i> @Model</span>
